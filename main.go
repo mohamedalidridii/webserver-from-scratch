@@ -1,10 +1,11 @@
 package main
 
-import "os"
+//import "os"
 import "fmt"
 import "io"
 import "log"
 import "bytes"
+import "net"
 
 
 func getLinesChannel(f io.ReadCloser)<-chan string {
@@ -40,13 +41,19 @@ func getLinesChannel(f io.ReadCloser)<-chan string {
 } 
 
 func main () {
-	f, err := os.Open("main.txt")
+	listner, err := net.Listen("tcp", ":42069")
 	if err != nil {
 	log.Fatal("error", "error", err)
 	}
-	lines := getLinesChannel(f)
-	for line := range lines {
+	
+	for {
+		conn, err := listner.Accept()
+		if err != nil {
+			log.Fatal("error", "error", err)
+		}
+		for line := range getLinesChannel(conn){
 		fmt.Printf("read: %s\n", line)
+	}
 	}
 }
 
